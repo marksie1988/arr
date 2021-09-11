@@ -1,0 +1,223 @@
+from datetime import datetime
+from .request_api import RequestAPI
+
+
+class BaseAPI(RequestAPI):
+    """Base functions in all Arr api's"""
+
+    def __init__(self, host_url, api_key, ver_uri="/"):
+
+        self.ver_uri = ver_uri
+        super().__init__(host_url, api_key)
+
+    def get_calendar(self, start_date=None, end_date=None, unmonitored=True):
+        """Gets upcoming releases by monitored, if start/end are not
+        supplied, today and tomorrow will be returned
+
+        Args:
+            start_date (:obj:`datetime`, optional): ISO8601 start datetime. Defaults to None.
+            end_date (:obj:`datetime`, optional): ISO8601 end datetime. Defaults to None.
+            unmonitored (bool, optional): Include unmonitored movies. Defaults to True.
+
+        Returns:
+            JSON: Array
+        """
+        path = "calendar"
+        params = {}
+        if start_date:
+            params["start"] = datetime.strptime(start_date, "%Y-%m-%d").strftime(
+                "%Y-%m-%d"
+            )
+        if end_date:
+            params["end"] = datetime.strptime(end_date, "%Y-%m-%d").strftime("%Y-%m-%d")
+        params["unmonitored"] = unmonitored
+
+        res = self.request_get(path, self.ver_uri, params=params)
+        return res
+
+    def get_system_status(self):
+        """Returns system status
+
+        Returns:
+            JSON: Array
+        """
+        path = "system/status"
+        res = self.request_get(path, self.ver_uri)
+        return res
+
+    def get_health(self):
+        """Query radarr for health information
+
+        Returns:
+            JSON: Array
+        """
+        path = "health"
+        res = self.request_get(path, self.ver_uri)
+        return res
+
+    def get_metadata(self):
+        """Get all metadata consumer settings
+
+        Returns:
+            JSON: Array
+        """
+        path = "metadata"
+        res = self.request_get(path, self.ver_uri)
+        return res
+
+    def get_updates(self):
+        """Will return a list of recent updated to Radarr
+
+        Returns:
+            JSON: Array
+        """
+        path = "update"
+        res = self.request_get(path, self.ver_uri)
+        return res
+
+    def get_root_folder(self):
+        """Query root folder information
+
+        Returns:
+            JSON: Array
+        """
+        path = "rootfolder"
+        res = self.request_get(path, self.ver_uri)
+        return res
+
+    def get_logs(
+        self,
+        page=1,
+        page_size=10,
+        sort_key="time",
+        sort_dir="desc",
+        filter_key=None,
+        filter_value="All",
+    ):
+        """Gets logs
+
+        Args:
+            page (int, optional): Specifiy page to return. Defaults to 1.
+            page_size (int, optional): Number of items per page. Defaults to 10.
+            sort_key (str, optional): Field to sort by. Defaults to "time".
+            sort_dir (str, optional): Direction to sort. Defaults to "desc".
+            filter_key (str, optional): Key to filter by. Defaults to None.
+            filter_value (str, optional): Value of the filter. Defaults to "All".
+
+        Returns:
+            JSON: Array
+        """
+        path = "log"
+        params = {
+            "page": page,
+            "pageSize": page_size,
+            "sortKey": sort_key,
+            "sortDir": sort_dir,
+            "filterKey": filter_key,
+            "filterValue": filter_value,
+        }
+        res = self.request_get(path, self.ver_uri, params=params)
+        return res
+
+    def get_disk_space(self):
+        """Query disk usage information
+            System > Status
+
+        Returns:
+            JSON: Array
+        """
+        path = "diskspace"
+        res = self.request_get(path, self.ver_uri)
+        return res
+
+    def get_backup(self):
+        """Returns the list of available backups
+
+        Returns:
+            JSON: Array
+        """
+        path = "system/backup"
+        res = self.request_get(path, self.ver_uri)
+        return res
+
+    def get_history(
+        self, sort_key="date", page=1, page_size=10, sort_dir="desc", id_=None
+    ):
+        """Gets history (grabs/failures/completed)
+
+        Args:
+            sort_key (str, optional): series.title or date. Defaults to "date".
+            page (int, optional): Page number to return. Defaults to 1.
+            page_size (int, optional): Number of items per page. Defaults to 10.
+            sort_dir (str, optional): Direction to sort the items. Defaults to "desc".
+            id_ (int, optional): Filter to a specific episode ID. Defaults to None.
+
+        Returns:
+            JSON: Array
+        """
+        path = "history"
+        params = {
+            "sortKey": sort_key,
+            "page": page,
+            "pageSize": page_size,
+            "sortDir": sort_dir,
+        }
+        if id_:
+            params["episodeId"] = id_
+        res = self.request_get(path, self.ver_uri, params=params)
+        return res
+
+    def get_blacklist(
+        self,
+        page=1,
+        page_size=20,
+        sort_direction="descending",
+        sort_key="date",
+    ):
+        """Returns blacklisted releases.
+
+        Args:
+            page (int, optional): Page to be returned. Defaults to 1.
+            page_size (int, optional): Number of results per page. Defaults to 20.
+            sort_direction (str, optional): Direction to sort items. Defaults to "descending".
+            sort_key (str, optional): Field to sort by. Defaults to "date".
+
+        Returns:
+            JSON: Array
+        """
+        params = {
+            "page": page,
+            "pageSize": page_size,
+            "sortDirection": sort_direction,
+            "sortKey": sort_key,
+        }
+        path = "blacklist"
+        res = self.request_get(path, self.ver_uri, params=params)
+        return res
+
+    def del_blacklist(self, id_):
+        """Removes a specific release (the id provided) from the blacklist
+
+        Args:
+            id_ (int): blacklist id from database
+
+        Returns:
+            JSON: Array
+        """
+        params = {"id": id_}
+        path = "blacklist"
+        res = self.request_del(path, self.ver_uri, params=params)
+        return res
+
+    def del_blacklist_bulk(self, data):
+        """Delete blacklisted releases in bulk
+
+        Args:
+            data (dict): blacklists that should be deleted
+
+        Returns:
+            JSON: 200 Ok, 401 Unauthorized
+        """
+        path = "blacklist/bulk"
+        res = self.request_del(path, self.ver_uri, data=data)
+        return res

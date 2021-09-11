@@ -34,7 +34,7 @@ class RequestAPI:
         self.auth = requests.auth.HTTPBasicAuth(username, password)
         return self.auth
 
-    def request_get(self, path, params=None):
+    def request_get(self, path, ver_uri="", params=None):
         """Wrapper on any get requests
 
         Args:
@@ -45,13 +45,13 @@ class RequestAPI:
             Object: Response object from requests
         """
         headers = {"X-Api-Key": self.api_key}
-        request_url = "{url}{path}".format(url=self.host_url, path=path)
+        request_url = f"{self.host_url}/api{ver_uri}/{path}"
         res = self.session.get(
             request_url, headers=headers, params=params, auth=self.auth
         )
         return res.json()
 
-    def request_post(self, path, params=None, data=None):
+    def request_post(self, path, ver_uri="", params=None, data=None):
         """Wrapper on any post requests
 
         Args:
@@ -63,13 +63,13 @@ class RequestAPI:
             Object: Response object from requests
         """
         headers = {"X-Api-Key": self.api_key}
-        request_url = "{url}{path}".format(url=self.host_url, path=path)
+        request_url = f"{self.host_url}/api{ver_uri}/{path}"
         res = self.session.post(
             request_url, headers=headers, params=params, json=data, auth=self.auth
         )
         return res.json()
 
-    def request_put(self, path, params=None, data=None):
+    def request_put(self, path, ver_uri="", params=None, data=None):
         """Wrapper on any put requests
 
         Args:
@@ -81,13 +81,13 @@ class RequestAPI:
             Object: Response object from requests
         """
         headers = {"X-Api-Key": self.api_key}
-        request_url = "{url}{path}".format(url=self.host_url, path=path)
+        request_url = f"{self.host_url}/api{ver_uri}/{path}"
         res = self.session.put(
             request_url, headers=headers, params=params, json=data, auth=self.auth
         )
         return res.json()
 
-    def request_del(self, path, params=None, data=None):
+    def request_del(self, path, ver_uri="", params=None, data=None):
         """Wrapper on any delete requests
 
         Args:
@@ -99,7 +99,7 @@ class RequestAPI:
             Object: Response object from requests
         """
         headers = {"X-Api-Key": self.api_key}
-        request_url = "{url}{path}".format(url=self.host_url, path=path)
+        request_url = f"{self.host_url}/api{ver_uri}/{path}"
         res = self.session.delete(
             request_url, headers=headers, params=params, json=data, auth=self.auth
         )
